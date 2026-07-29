@@ -10,9 +10,26 @@
 2. Follow the repo's install instructions to add the board manager URL and install the **XInput AVR Boards** package via **Tools → Board → Boards Manager**
 3. Run the included `XInput_Boards_Firmware` uploader sketch (or use the board's Serial/DFU install method per the repo instructions) to flash the XInput USB core onto your Pro Micro's 16u2/32u4 USB controller
 
+## Wiring
+
+| Signal              | Pin  | Notes                                      |
+|---------------------|------|--------------------------------------------|
+| Left joystick X     | A1   | analog                                     |
+| Left joystick Y     | A0   | analog                                     |
+| Gamepad button (A)  | 14   | `INPUT_PULLUP`, wire to GND, LOW = pressed |
+| Calibrate button    | 15   | `INPUT_PULLUP`, wire to GND, LOW = pressed |
+
+Both buttons use the internal pull-up, so each just needs a switch to ground — no external resistors.
+
 ## Setup
 
-1. Open [customjoy.ino](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/firmware/xinput/customjoy.ino) in Arduino IDE
+The sketch is a folder, not a single file. It contains three files that must stay together in the same directory:
+
+- `xinput.ino`
+- `joystick_core.cpp`
+- `joystick_core.h`
+
+1. Open [xinput.ino](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/xinput-firmware/xinput/xinput.ino) in Arduino IDE (opening the `.ino` loads the whole `xinput/` folder)
 2. Plug your Pro Micro into your PC
 3. In the Arduino IDE board dropdown, select **Arduino Leonardo (XInput)**
 
@@ -26,11 +43,23 @@
 Due to the nature of how the XInput USB mode works, Arduinos that have XInput sketches on them will not automatically reset when programmed by the IDE! You will need to reset the board by hand every time you upload new code.
 See the [dmadison/ArduinoXInput_AVR repo](https://github.com/dmadison/ArduinoXInput_AVR) for more details on this.
 
+## Calibration
+
+The firmware learns each joystick's true center and travel range and stores them in EEPROM, so calibration survives power cycles and reflashes of the same board. Run it once after assembly, or any time the stick drifts or feels off-center.
+
+1. **Center the stick** and let it rest.
+2. **Press and hold the calibrate button (pin 15).** The center is captured the instant you press, so don't touch the stick until it's held. The **RX LED lights up** to show calibration is active.
+3. **Sweep the stick through its full range** while holding — push into all four corners and around the edge so it sees the true min and max on both axes.
+4. **Release the calibrate button.** The captured min / center / max are saved to EEPROM.
+
+The RX LED off means calibration is not active. If you upload fresh firmware to a board with no stored calibration, it falls back to a default center and full ADC range until you calibrate.
+
 ## Verify It's Working
 
 1. Open the Windows Start menu and search for **"Set up USB game controllers"**
 2. **Controller (XBOX 360 For Windows)** should appear in the list
 3. Click **Properties** and confirm the analog joystick is responding
+4. If the resting position reads off-center or the stick can't reach the edges, run [Calibration](#calibration)
 
 ## Game Compatibility
 
