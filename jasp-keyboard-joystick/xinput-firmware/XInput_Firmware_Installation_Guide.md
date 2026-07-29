@@ -54,6 +54,16 @@ The firmware learns each joystick's true center and travel range and stores them
 
 The RX LED off means calibration is not active. If you upload fresh firmware to a board with no stored calibration, it falls back to a default center and full ADC range until you calibrate.
 
+### Reset to Defaults
+
+To wipe a stored calibration and return to the defaults (center at mid-scale, full ADC range):
+
+1. **Hold the calibrate button (pin 15) while powering on** the board (plug it in, or reset it, with the button already down).
+2. The **RX LED blinks three times** to confirm the EEPROM was reset to defaults.
+3. **Release the button.**
+
+The boot-time hold is treated only as a reset — it does not start a new calibration. To recalibrate afterward, release the button and then run the normal [Calibration](#calibration) steps.
+
 ## Verify It's Working
 
 1. Open the Windows Start menu and search for **"Set up USB game controllers"**

@@ -66,6 +66,13 @@ Calibration validateCalibration(Calibration storedCalibration) {
            : defaultCalibration();
 }
 
+// resetRequested (button held at power-on) forces defaults over the stored value.
+Calibration resolveInitialCalibration(Calibration storedCalibration, boolean resetRequested) {
+  return resetRequested
+           ? defaultCalibration()
+           : validateCalibration(storedCalibration);
+}
+
 AxisCalibration expandAxisToInclude(AxisCalibration axis, int rawReading) {
   if (rawReading < axis.minValue) {
     axis.minValue = rawReading;
@@ -76,14 +83,16 @@ AxisCalibration expandAxisToInclude(AxisCalibration axis, int rawReading) {
   return axis;
 }
 
-State makeInitialState(Calibration calibration) {
+State makeInitialState(Calibration calibration, boolean calibrationButtonHeldAtBoot) {
   State state;
   state.calibration = calibration;
   state.calibrating = false;
+  state.calibrationButtonReleasedSinceBoot = !calibrationButtonHeldAtBoot;
   for (int buttonIndex = 0; buttonIndex < NumGamepadButtons; buttonIndex++) {
     state.gamepadButtonDebouncers[buttonIndex] = { false, false, 0 };
   }
-  state.calibrationButtonDebouncer = { false, false, 0 };
+  // Seed to boot state so a held button reads as pressed, not a phantom press edge.
+  state.calibrationButtonDebouncer = { calibrationButtonHeldAtBoot, calibrationButtonHeldAtBoot, 0 };
   return state;
 }
 
@@ -111,6 +120,16 @@ static State finishCalibrationAtReleaseEdge(State state, Outputs& outputs) {
   return state;
 }
 
+// The power-on reset already fired in the shell; swallow the ongoing hold so it can't
+// also read as a calibration press. A real calibration needs a fresh release-and-press.
+static State consumeBootResetHold(State state, boolean calibrationButtonPressed) {
+  if (!calibrationButtonPressed) {
+    state.calibrationButtonReleasedSinceBoot = true;
+  }
+  state.calibrating = false;
+  return state;
+}
+
 static State updateCalibrationButton(State state, const Inputs& inputs, Outputs& outputs) {
   Debouncer calibrationDebouncer = state.calibrationButtonDebouncer;
   boolean calibrationButtonPressedRaw = !inputs.calibrationButtonRaw;
@@ -118,6 +137,11 @@ static State updateCalibrationButton(State state, const Inputs& inputs, Outputs&
   state.calibrationButtonDebouncer = advancedCalibrationDebouncer;
 
   boolean calibrationButtonPressed = advancedCalibrationDebouncer.stableState;
+
+  if (!state.calibrationButtonReleasedSinceBoot) {
+    return consumeBootResetHold(state, calibrationButtonPressed);
+  }
+
   boolean pressStateChanged = calibrationButtonPressed != state.calibrating;
 
   if (pressStateChanged && calibrationButtonPressed) {

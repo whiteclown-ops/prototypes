@@ -43,6 +43,7 @@ struct Vector2 {
 struct State {
   Calibration calibration;
   boolean calibrating;  // true while calibration button held
+  boolean calibrationButtonReleasedSinceBoot;  // false during a power-on reset hold
   Debouncer gamepadButtonDebouncers[NumGamepadButtons];
   Debouncer calibrationButtonDebouncer;
 };
@@ -75,8 +76,9 @@ float normalizeAxisSignedAboutCenter(int rawReading, int minValue, int center, i
 Vector2 applyRadialDeadzone(float normalizedX, float normalizedY);
 Calibration defaultCalibration();
 Calibration validateCalibration(Calibration storedCalibration);
+Calibration resolveInitialCalibration(Calibration storedCalibration, boolean resetRequested);
 AxisCalibration expandAxisToInclude(AxisCalibration axis, int rawReading);
-State makeInitialState(Calibration calibration);
+State makeInitialState(Calibration calibration, boolean calibrationButtonHeldAtBoot);
 TickResult computeTick(State state, Inputs inputs);
 
 #endif  // JOYSTICK_CORE_H

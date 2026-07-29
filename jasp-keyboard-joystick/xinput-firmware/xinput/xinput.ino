@@ -43,6 +43,16 @@ void setup() {
   XInput.begin();
 }
 
+// Confirms a power-on EEPROM reset. Runs once at boot, so the delays are harmless.
+static void blinkResetFeedback() {
+  for (int blink = 0; blink < 3; blink++) {
+    digitalWrite(LED_BUILTIN_RX, LOW);  // active-LOW; LOW = on
+    delay(120);
+    digitalWrite(LED_BUILTIN_RX, HIGH);  // off
+    delay(120);
+  }
+}
+
 // Signed-cast subtraction handles micros() wrap (~71 min).
 static boolean isTimeForNextTick(unsigned long& nextTickMicros) {
   if ((long)(micros() - nextTickMicros) < 0) {
@@ -87,9 +97,15 @@ void loop() {
   static unsigned long nextTickMicros = 0;
 
   if (!initialized) {
+    boolean calibrationHeldAtBoot = (digitalRead(Pin_Calibrate) == LOW);  // held at power-on = reset
     Calibration storedCalibration;
     EEPROM.get(CalibrationEepromAddress, storedCalibration);
-    state = makeInitialState(validateCalibration(storedCalibration));
+    Calibration initialCalibration = resolveInitialCalibration(storedCalibration, calibrationHeldAtBoot);
+    if (calibrationHeldAtBoot) {
+      EEPROM.put(CalibrationEepromAddress, initialCalibration);  // persist reset to defaults
+      blinkResetFeedback();
+    }
+    state = makeInitialState(initialCalibration, calibrationHeldAtBoot);
     nextTickMicros = micros();
     initialized = true;
   }
