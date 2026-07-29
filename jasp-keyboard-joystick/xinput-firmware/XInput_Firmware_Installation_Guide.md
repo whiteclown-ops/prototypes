@@ -8,7 +8,7 @@
 
 1. Go to [github.com/dmadison/ArduinoXInput_AVR](https://github.com/dmadison/ArduinoXInput_AVR)
 2. Follow the repo's install instructions to add the board manager URL and install the **XInput AVR Boards** package via **Tools → Board → Boards Manager**
-3. Run the included `XInput_Boards_Firmware` uploader sketch (or use the board's Serial/DFU install method per the repo instructions) to flash the XInput USB core onto your Pro Micro's 16u2/32u4 USB controller
+3. Run the included `XInput_Boards_Firmware` uploader sketch (or use the board's Serial/DFU install method per the repo instructions) to flash the XInput USB core onto your Arduino Micro's ATmega32u4 USB controller
 
 ## Wiring
 
@@ -30,8 +30,8 @@ The sketch is a folder, not a single file. It contains three files that must sta
 - `joystick_core.h`
 
 1. Open [xinput.ino](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/xinput-firmware/xinput/xinput.ino) in Arduino IDE (opening the `.ino` loads the whole `xinput/` folder)
-2. Plug your Pro Micro into your PC
-3. In the Arduino IDE board dropdown, select **Arduino Leonardo (XInput)**
+2. Plug your Arduino Micro into your PC
+3. In the Arduino IDE board dropdown, select **Arduino Micro (XInput)**
 
 ## Compile & Upload
 
