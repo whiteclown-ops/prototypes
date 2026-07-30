@@ -8,7 +8,7 @@
 // joystick_core.h / joystick_core.cpp.
 
 const boolean InvertLeftXAxis = false;
-const boolean InvertLeftYAxis = false;
+const boolean InvertLeftYAxis = true;
 
 const int Pin_LeftJoyX = A1;
 const int Pin_LeftJoyY = A0;
