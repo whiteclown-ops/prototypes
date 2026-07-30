@@ -18,8 +18,9 @@
 | Left joystick Y     | A0   | analog                                     |
 | Gamepad button (A)  | 14   | `INPUT_PULLUP`, wire to GND, LOW = pressed |
 | Calibrate button    | 15   | `INPUT_PULLUP`, wire to GND, LOW = pressed |
+| Calibration LED     | 2    | active-HIGH; anode to pin, cathode to GND through a resistor |
 
-Both buttons use the internal pull-up, so each just needs a switch to ground — no external resistors.
+Both buttons use the internal pull-up, so each just needs a switch to ground — no external resistors. The calibration LED needs a current-limiting resistor (~220–330 Ω) in series.
 
 ## Setup
 
@@ -48,18 +49,18 @@ See the [dmadison/ArduinoXInput_AVR repo](https://github.com/dmadison/ArduinoXIn
 The firmware learns each joystick's true center and travel range and stores them in EEPROM, so calibration survives power cycles and reflashes of the same board. Run it once after assembly, or any time the stick drifts or feels off-center.
 
 1. **Center the stick** and let it rest.
-2. **Press and release the calibrate button (pin 15).** The center is captured the instant you press, so don't touch the stick until you've let go. The **RX LED lights up** to show calibration is active. It's a toggle — the button is not held during calibration, so both hands are free.
+2. **Press and release the calibrate button (pin 15).** The center is captured the instant you press, so don't touch the stick until you've let go. The **calibration LED (pin 2) lights up** to show calibration is active. It's a toggle — the button is not held during calibration, so both hands are free.
 3. **Sweep the stick through its full range** — push into all four corners and around the edge so it sees the true min and max on both axes.
-4. **Press the calibrate button again** to exit. The captured min / center / max are saved to EEPROM and the **RX LED turns off**.
+4. **Press the calibrate button again** to exit. The captured min / center / max are saved to EEPROM and the **calibration LED turns off**.
 
-The RX LED off means calibration is not active. If you upload fresh firmware to a board with no stored calibration, it falls back to a default center and full ADC range until you calibrate.
+The calibration LED off means calibration is not active. If you upload fresh firmware to a board with no stored calibration, it falls back to a default center and full ADC range until you calibrate.
 
 ### Reset to Defaults
 
 To wipe a stored calibration and return to the defaults (center at mid-scale, full ADC range):
 
 1. **Hold the calibrate button (pin 15) while powering on** the board (plug it in, or reset it, with the button already down).
-2. The **RX LED blinks three times** to confirm the EEPROM was reset to defaults.
+2. The **calibration LED (pin 2) blinks three times** to confirm the EEPROM was reset to defaults.
 3. **Release the button.**
 
 The boot-time hold is treated only as a reset — it does not start a new calibration. To recalibrate afterward, release the button and then run the normal [Calibration](#calibration) steps.

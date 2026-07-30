@@ -186,7 +186,7 @@ TickResult computeTick(State state, Inputs inputs) {
   state = updateCalibrationButton(state, inputs, outputs);
   state = trackCalibrationExtremes(state, inputs);
   computeJoystickOutput(state, inputs, outputs);
-  outputs.rxLed = state.calibrating;
+  outputs.calibrationLed = state.calibrating;
 
   TickResult result = { state, outputs };
   return result;

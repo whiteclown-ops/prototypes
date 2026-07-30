@@ -13,7 +13,8 @@ const boolean InvertLeftYAxis = true;
 const int Pin_LeftJoyX = A1;
 const int Pin_LeftJoyY = A0;
 
-const int Pin_Calibrate = 15;  // hold to calibrate (INPUT_PULLUP, LOW = pressed)
+const int Pin_Calibrate = 15;  // press to toggle calibration (INPUT_PULLUP, LOW = pressed)
+const int Pin_CalibrationLed = 2;  // external LED, active-HIGH (anode to pin, cathode to GND via resistor)
 const int CalibrationEepromAddress = 0;
 
 const unsigned long TickIntervalMicros = 1000;  // 1000 Hz target tick rate
@@ -35,8 +36,8 @@ void setup() {
     pinMode(ButtonConfigs[buttonIndex].pin, INPUT_PULLUP);
   }
   pinMode(Pin_Calibrate, INPUT_PULLUP);
-  pinMode(LED_BUILTIN_RX, OUTPUT);
-  digitalWrite(LED_BUILTIN_RX, HIGH);  // RX LED active-LOW; HIGH = off
+  pinMode(Pin_CalibrationLed, OUTPUT);
+  digitalWrite(Pin_CalibrationLed, LOW);  // active-HIGH; LOW = off
 
   XInput.setJoystickRange(-JoystickOutputMax, JoystickOutputMax);  // signed range; center = 0
   XInput.setAutoSend(false);                                       // wait for all controls before sending
@@ -46,9 +47,9 @@ void setup() {
 // Confirms a power-on EEPROM reset. Runs once at boot, so the delays are harmless.
 static void blinkResetFeedback() {
   for (int blink = 0; blink < 3; blink++) {
-    digitalWrite(LED_BUILTIN_RX, LOW);  // active-LOW; LOW = on
+    digitalWrite(Pin_CalibrationLed, HIGH);  // active-HIGH; HIGH = on
     delay(120);
-    digitalWrite(LED_BUILTIN_RX, HIGH);  // off
+    digitalWrite(Pin_CalibrationLed, LOW);  // off
     delay(120);
   }
 }
@@ -83,7 +84,7 @@ static void applyOutputs(const Outputs& outputs, const State& state) {
   }
   XInput.setJoystickX(JOY_LEFT, outputs.joystickX, InvertLeftXAxis);
   XInput.setJoystickY(JOY_LEFT, outputs.joystickY, InvertLeftYAxis);
-  digitalWrite(LED_BUILTIN_RX, outputs.rxLed ? LOW : HIGH);  // active-LOW
+  digitalWrite(Pin_CalibrationLed, outputs.calibrationLed ? HIGH : LOW);  // active-HIGH
 
   if (outputs.saveCalibration) {
     EEPROM.put(CalibrationEepromAddress, state.calibration);

@@ -62,7 +62,7 @@ struct Outputs {
   boolean gamepadButtons[NumGamepadButtons];
   int joystickX;
   int joystickY;
-  boolean rxLed;
+  boolean calibrationLed;
   boolean saveCalibration;  // shell persists calibration to EEPROM
 };
 
