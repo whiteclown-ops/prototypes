@@ -13,7 +13,7 @@ const boolean InvertLeftYAxis = true;
 const int Pin_LeftJoyX = A1;
 const int Pin_LeftJoyY = A0;
 
-const int Pin_Calibrate = 15;  // press to toggle calibration (INPUT_PULLUP, LOW = pressed)
+const int Pin_Calibrate = 15;      // press to toggle calibration (INPUT_PULLUP, LOW = pressed)
 const int Pin_CalibrationLed = 2;  // external LED, active-HIGH (anode to pin, cathode to GND via resistor)
 const int CalibrationEepromAddress = 0;
 
