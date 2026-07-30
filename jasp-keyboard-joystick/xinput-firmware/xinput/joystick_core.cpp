@@ -108,20 +108,25 @@ static State updateGamepadButtons(State state, const Inputs& inputs, Outputs& ou
   return state;
 }
 
-static State captureCenterAtPressEdge(State state, const Inputs& inputs) {
+static State enterCalibration(State state, const Inputs& inputs) {
   state.calibration.x = { inputs.joystickX, inputs.joystickX, inputs.joystickX };
   state.calibration.y = { inputs.joystickY, inputs.joystickY, inputs.joystickY };
+  state.calibrating = true;
   return state;
 }
 
-static State finishCalibrationAtReleaseEdge(State state, Outputs& outputs) {
+static State exitCalibration(State state, Outputs& outputs) {
   state.calibration.magicNumber = CalibrationMagicNumber;
-  outputs.saveCalibration = true;  // write only on release; EEPROM has limited cycles
+  outputs.saveCalibration = true;  // write only on exit; EEPROM has limited cycles
+  state.calibrating = false;
   return state;
 }
 
-// The power-on reset already fired in the shell; swallow the ongoing hold so it can't
-// also read as a calibration press. A real calibration needs a fresh release-and-press.
+static State toggleCalibration(State state, const Inputs& inputs, Outputs& outputs) {
+  return state.calibrating ? exitCalibration(state, outputs) : enterCalibration(state, inputs);
+}
+
+// Swallows the power-on reset hold; a real toggle needs a fresh release-and-press.
 static State consumeBootResetHold(State state, boolean calibrationButtonPressed) {
   if (!calibrationButtonPressed) {
     state.calibrationButtonReleasedSinceBoot = true;
@@ -130,28 +135,24 @@ static State consumeBootResetHold(State state, boolean calibrationButtonPressed)
   return state;
 }
 
-static State updateCalibrationButton(State state, const Inputs& inputs, Outputs& outputs) {
-  Debouncer calibrationDebouncer = state.calibrationButtonDebouncer;
-  boolean calibrationButtonPressedRaw = !inputs.calibrationButtonRaw;
-  Debouncer advancedCalibrationDebouncer = advanceDebouncer(calibrationDebouncer, calibrationButtonPressedRaw, inputs.nowMillis);
-  state.calibrationButtonDebouncer = advancedCalibrationDebouncer;
+static boolean isCalibrationPressEdge(const State& previous, const Debouncer& advanced) {
+  return advanced.stableState && !previous.calibrationButtonDebouncer.stableState;
+}
 
-  boolean calibrationButtonPressed = advancedCalibrationDebouncer.stableState;
+// Momentary toggle: each debounced press edge flips calibration mode.
+static State updateCalibrationButton(State state, const Inputs& inputs, Outputs& outputs) {
+  boolean calibrationButtonPressedRaw = !inputs.calibrationButtonRaw;
+  Debouncer advanced = advanceDebouncer(state.calibrationButtonDebouncer, calibrationButtonPressedRaw, inputs.nowMillis);
+  boolean pressEdge = isCalibrationPressEdge(state, advanced);
+  state.calibrationButtonDebouncer = advanced;
 
   if (!state.calibrationButtonReleasedSinceBoot) {
-    return consumeBootResetHold(state, calibrationButtonPressed);
+    return consumeBootResetHold(state, advanced.stableState);
   }
-
-  boolean pressStateChanged = calibrationButtonPressed != state.calibrating;
-
-  if (pressStateChanged && calibrationButtonPressed) {
-    state = captureCenterAtPressEdge(state, inputs);
+  if (!pressEdge) {
+    return state;
   }
-  if (pressStateChanged && !calibrationButtonPressed) {
-    state = finishCalibrationAtReleaseEdge(state, outputs);
-  }
-  state.calibrating = calibrationButtonPressed;
-  return state;
+  return toggleCalibration(state, inputs, outputs);
 }
 
 static State trackCalibrationExtremes(State state, const Inputs& inputs) {

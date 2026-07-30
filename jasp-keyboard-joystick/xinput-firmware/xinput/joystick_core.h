@@ -42,7 +42,7 @@ struct Vector2 {
 
 struct State {
   Calibration calibration;
-  boolean calibrating;  // true while calibration button held
+  boolean calibrating;                         // true while in calibration mode (toggled by press edges)
   boolean calibrationButtonReleasedSinceBoot;  // false during a power-on reset hold
   Debouncer gamepadButtonDebouncers[NumGamepadButtons];
   Debouncer calibrationButtonDebouncer;
