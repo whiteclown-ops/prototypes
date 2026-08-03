@@ -14,8 +14,15 @@ There is no detailed build guide available at the moment, but you can see the wh
 
 
 ## Firmware
-There is a quick and dirty firmware available [here](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/firmware), it's super basic but it works. If I make something more advanced, I'll be sure to update it. [Installation guide](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/firmware/Firmware_Installation_Guide.md)
 
+There are two firmware options:
+
+### Joystick (basic)
+A quick and dirty firmware available [here](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/firmware). It's super basic but it works. Enumerates the board as a generic USB joystick. [Installation guide](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/firmware/Firmware_Installation_Guide.md)
+
+### XInput (Xbox 360 controller)
+A newer firmware available [here](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/xinput-firmware) that enumerates the board as an Xbox 360 controller, so most games recognize it directly with no remapper needed. It adds debounced gamepad buttons, a radial deadzone, 1000hz polling, and a stick calibration stored in EEPROM. [Installation guide](https://github.com/multifex/prototypes/blob/main/jasp-keyboard-joystick/xinput-firmware/XInput_Firmware_Installation_Guide.md)
+> Note: This firmware does make use of an extra button for calibarion and an extra LED; But, the code can be modified to use the joystick button for calibarion and the native rx or tx LED on the Ardunio Micro for feedback. Although this is not recommended as it is difficult to click the joystick perfectly center, as the start of the calibarion mode expects.
 
 ## License
 
