@@ -1,5 +1,7 @@
 # Firmware Installation Guide
 
+> **Note:** This guide covers the basic **joystick** firmware, which enumerates the board as a generic USB joystick (Arduino Leonardo). There is also an **XInput** firmware that enumerates the board as an Xbox 360 controller — most games recognize it directly with no remapper needed, and it adds stick calibration stored in EEPROM. See the [XInput Firmware Installation Guide](../xinput-firmware/XInput_Firmware_Installation_Guide.md).
+
 ## Prerequisites
 - Download and install [Arduino IDE](https://www.arduino.cc/en/software/)
 - During first launch, allow Arduino IDE to install drivers when prompted
